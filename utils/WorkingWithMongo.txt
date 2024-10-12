@@ -1,0 +1,76 @@
+pymongo is the best and simplest way to interact with mongodb.
+
+1. Install the required packages:
+
+pip install pymongo dnspython
+
+2. Connect to MongoDB Atlas:
+
+In your Django project, you can set up a direct connection to MongoDB using PyMongo. You can do this inside a Django view.
+Example:
+a) Connecting to MongoDB Atlas:
+
+In your settings.py, add your MongoDB connection details. This is the URI provided by MongoDB Atlas.
+
+# settings.py
+import pymongo
+
+MONGO_DB_URI = "your_atlas_connection_string"
+
+b) Creating a view that interacts with MongoDB:
+
+# views.py
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from django.conf import settings
+import pymongo
+
+# Establish MongoDB connection
+client = pymongo.MongoClient(settings.MONGO_DB_URI)
+db = client['your_database']  # Access your MongoDB database
+
+@api_view(['GET'])
+def get_users(request):
+    users_collection = db['users']  # Access the 'users' collection
+    users = list(users_collection.find({}, {"_id": 0}))  # Fetch all users, exclude '_id' field
+    return Response(users)
+
+@api_view(['POST'])
+def create_user(request):
+    users_collection = db['users']
+    user_data = request.data
+    result = users_collection.insert_one(user_data)  # Insert new user into the collection
+    return Response({"message": "User created", "user_id": str(result.inserted_id)})
+
+@api_view(['GET'])
+def get_user(request, user_id):
+    users_collection = db['users']
+    user = users_collection.find_one({"_id": pymongo.ObjectId(user_id)}, {"_id": 0})  # Find user by ObjectId
+    if user:
+        return Response(user)
+    else:
+        return Response({"error": "User not found"}, status=404)
+
+c) Set up URLs for the API:
+
+
+# urls.py
+from django.urls import path
+from .views import get_users, create_user, get_user
+
+urlpatterns = [
+    path('users/', get_users, name='user-list'),
+    path('users/create/', create_user, name='create-user'),
+    path('users/<str:user_id>/', get_user, name='user-detail'),
+]
+
+4. Why use PyMongo instead of Django Models?
+
+    Flexibility: If you don’t need the ORM-like functionality or complex relationships between documents, using PyMongo directly gives you more control and reduces overhead.
+    Dynamic schemas: MongoDB documents are flexible, and using PyMongo allows you to work with dynamic schemas directly without having to update models.
+    Performance: For simple queries and operations, directly interacting with MongoDB using PyMongo can be faster than using an ORM like MongoEngine.
+
+When to use Django models (via MongoEngine or another ODM)?
+
+    If you need Django-like ORM features such as validation, form handling, migrations (for relational databases), or automatic model management.
+    If you’re building a complex application where the schema is relatively stable and you want to leverage Django’s model framework.

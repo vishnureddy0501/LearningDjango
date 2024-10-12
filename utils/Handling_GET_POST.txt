@@ -1,0 +1,10 @@
+from django.http import JsonResponse
+import json
+
+def insertUser(request):
+    if request.method == "GET":
+        return handle_get_request(request)
+    elif request.method == "POST":
+        return handle_post_request(request)
+    else:
+        return JsonResponse({"success": False, "error": "Unsupported request method."})
