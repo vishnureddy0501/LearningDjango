@@ -19,5 +19,6 @@ from calc.urls import urlpatterns
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('calc.urls'))
+    path('', include('calc.urls')),
+    path('', include('learningDjangoRestFtFramework.urls'))
 ]

@@ -1,0 +1,83 @@
+
+
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from pymongo import MongoClient
+
+# Set up MongoDB connection
+client = MongoClient('mongodb://localhost:27017/')
+db = client['mydatabase']
+users_collection = db['users']
+
+# View to list and create users
+class UserListCreateView(APIView):
+    def get(self, request):
+        # Fetch data from MongoDB
+        users = list(users_collection.find({}, {'_id': 0}))
+        return Response(users)
+
+    def post(self, request):
+        # Insert new user data into MongoDB
+        new_user = request.data
+        users_collection.insert_one(new_user)
+        return Response(new_user, status=status.HTTP_201_CREATED)
+
+# View to retrieve, update, and delete users by email
+class UserDetailView(APIView):
+    def get_object(self, email):
+        # Query MongoDB to get a user by email
+        return users_collection.find_one({"email": email}, {'_id': 0})
+
+    def get(self, request, email):
+        user = self.get_object(email)
+        if user:
+            return Response(user)
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    def put(self, request, email):
+        user = self.get_object(email)
+        if user:
+            # Update user data in MongoDB
+            users_collection.update_one({"email": email}, {"$set": request.data})
+            updated_user = users_collection.find_one({"email": email}, {'_id': 0})
+            return Response(updated_user)
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    def delete(self, request, email):
+        result = users_collection.delete_one({"email": email})  # Delete user from MongoDB
+        if result.deleted_count:
+            return Response({"message": "User deleted"}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+Explanation of the Code
+-------------------------
+    UserListCreateView:
+        GET Method:
+            Fetches all users from the users collection using find(), omitting the _id field in the response. The results are returned as a list of dictionaries.
+        POST Method:
+            Inserts a new user into the MongoDB collection using the insert_one() method. The data for the new user is retrieved from the request body and returned as the response.
+
+    UserDetailView:
+        get_object Method:
+            A helper method that queries the MongoDB collection for a user based on their email.
+        GET Method:
+            Retrieves a user by email. If found, it returns the user’s data; if not, it returns a "User not found" error.
+        PUT Method:
+            Updates the user’s data based on the provided email. If the user exists, the update is performed using update_one(), and the updated user data is returned.
+        DELETE Method:
+            Deletes the user based on the email provided. If successful, it returns a success message; if not, it returns an error message.
+
+Step 3: Configure URLs
+
+In your urls.py, you can map the views to their respective endpoints:
+
+python
+
+from django.urls import path
+from .views import UserListCreateView, UserDetailView
+
+urlpatterns = [
+    path('users/', UserListCreateView.as_view(), name='user-list-create'),
+    path('users/<str:email>/', UserDetailView.as_view(), name='user-detail'),
+]

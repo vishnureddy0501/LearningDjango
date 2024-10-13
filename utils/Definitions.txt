@@ -1,0 +1,5 @@
+what is serializer?
+-------------------
+converts the query sets to json format.
+if you are working with sql database. the data is table format. but the frontend wants data in json format.
+Hence, serializer is used to convert data in other formats to json format.
