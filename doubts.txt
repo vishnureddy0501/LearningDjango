@@ -1,0 +1,14 @@
+how to store the sequences in db? tenant wise data storage?
+are we storing all the sequences in a list and filtering them out when we are sending to backend.
+
+can't i send back the insertedResult?
+-------------------------------------------
+    def post(self, request):
+        # list api to return all sequences.
+        node = request.query_params.get('node')
+        period = request.query_params.get('period')
+        data = request.data
+        document = { **data, "node": node, "period": period }
+        insertedResult = sequencesCollection.insert_one(document)
+        # use this json response only
+        return JsonResponse({"success": True })

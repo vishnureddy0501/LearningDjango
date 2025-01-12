@@ -3,3 +3,58 @@ what is serializer?
 converts the query sets to json format.
 if you are working with sql database. the data is table format. but the frontend wants data in json format.
 Hence, serializer is used to convert data in other formats to json format.
+
+args and kwargs:
+----------------
+*args:
+    What it means: *args allows you to pass a variable number of positional arguments to the method. It captures all positional arguments that are not explicitly named in the method definition.
+    Why it's used: In Django, sometimes views or methods can receive additional arguments. Using *args allows you to pass them without breaking the method signature, even if you don't know in advance how many arguments might be passed.
+**kwargs:
+    What it means: **kwargs is used to pass a variable number of keyword arguments (arguments passed as key=value) to the method.
+    Why it's used: Similar to *args, **kwargs captures any additional keyword arguments that the method might receive. In Django views, this can include things like URL parameters (e.g., pk for primary key).
+
+eg:
+    def example_function(**kwargs):
+        for key, value in kwargs.items():
+            print(f"{key} = {value}")
+    example_function(name="Alice", age=30, city="New York")
+
+
+You can use *args and **kwargs together in the same function.
+-----------------------------------------------------------------
+def example_function(*args, **kwargs):
+    print("Positional arguments:", args)
+    print("Keyword arguments:", kwargs)
+
+example_function(1, 2, 3, name="Alice", age=30)
+# Output:
+# Positional arguments: (1, 2, 3)
+# Keyword arguments: {'name': 'Alice', 'age': 30}
+
+important: 
+---------
+positional arguments accessed using tuple.
+keyword arguments accessed using dictionary
+
+self parameter:
+----------------
+1. self parameter is a reference to the current instance of the class. it is used to access variables that belongs to the class.
+2. it doesn't have to be named self. you can call with what ever name you want. but it has to be the first parameter of any method in the class.
+
+eg: 
+this won't work. because you have to access the variables of calss using self. 
+class MyClass:
+    x = 5;
+    def handleMethod():
+        print("value of x", x)
+obj = MyClass()
+obj.handleMethod()
+
+
+working example:
+class MyClass:
+    x = 5;
+    def handleMethod(self):
+        print("value of x", self.x)
+obj = MyClass()
+obj.handleMethod()
